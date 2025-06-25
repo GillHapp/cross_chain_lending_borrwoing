@@ -62,30 +62,17 @@ const Dashboard = () => {
 
     try {
       setIsSupplying(true);
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      const signer = await provider.getSigner();
 
-      // Example parameters – replace these as needed
-      const destinationChainSelector = "14767482510784806043"; // Replace with actual selector
-      const receiver = "0xD1ae674f6332Ae704125271238e192ffaFb0fbfB"; // Could be the same user address or a cross-chain receiver
-      const message = "Collateralizing ETH"; // Any purpose or tracking note
-      const token = "0x4e9097fa54f0a31f4c049ddb4092f0a7503f908e"; // Address of the token to receive (like USDC) – must be set correctly
-
-      // Call the smart contract function with msg.value
-      const tx = await contract.sendMessageWithCollateralInETH(
-        destinationChainSelector,
-        receiver,
-        message,
-        token,
-        {
-          value: ethers.parseEther(supplyAmount),
-        }
-      );
+      const tx = await contract.depositETH({
+        value: ethers.parseEther(supplyAmount),
+      });
 
       await tx.wait();
-      toast.success(`Successfully supplied ${supplyAmount} ETH as collateral`);
+
+      toast.success(`Successfully deposited ${supplyAmount} ETH`);
 
       // Refresh balances
+      const provider = new ethers.BrowserProvider(window.ethereum);
       const newContractBalance = await provider.getBalance(LENDING_BORROWING_ADDRESS);
       const newWalletBalance = await provider.getBalance(address);
       setContractBalance(ethers.formatEther(newContractBalance));
@@ -100,6 +87,7 @@ const Dashboard = () => {
       setIsSupplying(false);
     }
   };
+
 
 
   if (!isConnected) {
@@ -181,6 +169,19 @@ const Dashboard = () => {
           </table>
         </div>
       </div>
+      {/* Token Import Notice */}
+      <div className="mt-6 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-300 dark:border-yellow-700 text-yellow-800 dark:text-yellow-200 rounded p-4">
+        <p className="text-sm">
+          <strong>Note:</strong> If you don't see your <strong>aTOK</strong> token after supplying, please import it manually to MetaMask using this contract address:
+        </p>
+        <div className="mt-2 text-sm font-mono bg-white dark:bg-gray-800 px-3 py-2 rounded border border-gray-300 dark:border-gray-600">
+          0xce8C76D90679d5b34DB1e9F50771cB39F79B36FC
+        </div>
+        <p className="mt-2 text-sm">
+          You can do this in MetaMask by clicking “Import Tokens” and pasting the address above.
+        </p>
+      </div>
+
 
       {/* Supply Modal */}
       {isModalOpen && (
