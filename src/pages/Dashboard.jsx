@@ -11,7 +11,7 @@ import AssetDetails from './AssetDetail';
 const Dashboard = () => {
   const { address, isConnected } = useAccount();
   const chainId = useChainId();
-
+  const START_BLOCK = "8616839";
   const [contract, setContract] = useState(null);
   const [contractBalance, setContractBalance] = useState(null);
   const [supplyApy, setSupplyApy] = useState(null);
@@ -28,13 +28,133 @@ const Dashboard = () => {
   const [collateralAmount, setCollateralAmount] = useState('');
   const [isCollateralModalOpen, setIsCollateralModalOpen] = useState(false);
 
+  const [healthCheckAddress, setHealthCheckAddress] = useState('');
+  const [collateralHealth, setCollateralHealth] = useState(null);
+  const [isHealthLoading, setIsHealthLoading] = useState(false);
+  const [isLiquidating, setIsLiquidating] = useState(false);
+  const [userHealthData, setUserHealthData] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
+  const RPC_URL = "https://sepolia.infura.io/v3/2de477c3b1b74816ae5475da6d289208";
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && window.ethereum) {
-      setProvider(new ethers.BrowserProvider(window.ethereum));
-    }
+    const load = async () => {
+      if (typeof window !== 'undefined' && window.ethereum) {
+        const browserProvider = new ethers.BrowserProvider(window.ethereum);
+        setProvider(browserProvider);
+
+        try {
+          const data = await fetchUserCollateralHealth(browserProvider, START_BLOCK);
+          setUserData(data);
+        } catch (error) {
+          console.error("Failed to fetch user health data:", error);
+        }
+      }
+    };
+
+    load();
   }, []);
+
+
+  async function fetchUserCollateralHealth(fromBlock, toBlock = "latest") {
+    const providers = new ethers.JsonRpcApiProvider(RPC_URL);
+    const lending = new ethers.Contract(
+      LENDING_BORROWING_ADDRESS, LENDING_BORROWING_ABI, providers)
+    const filter = lending.filters.MessageSent(); // event filter
+    const events = await lending.queryFilter(filter, fromBlock, toBlock);
+
+    // Extract unique borrower addresses
+    const uniqueAddresses = [...new Set(events.map(e => e.args[2]))]; // e.args[2] = msg.sender
+
+    // Query each user's health
+    const userHealthData = await Promise.allSettled(
+      uniqueAddresses.map(async (user) => {
+        try {
+          const [ethPrice, collateralUsd, loanUsd, ltv, status] = await lending.checkCollateralHealth(user);
+          return {
+            address: user,
+            ethPrice: Number(ethPrice),
+            collateralUsd: Number(collateralUsd),
+            loanUsd: Number(loanUsd),
+            ltv: Number(ltv) / 100, // Convert BPS to %
+            status
+          };
+        } catch (err) {
+          return null; // skip if no collateral or fails
+        }
+      })
+    );
+
+    return userHealthData
+      .filter(res => res.status === "fulfilled" && res.value)
+      .map(res => res.value);
+  }
+
+  const checkHealth = async () => {
+    if (!healthCheckAddress || !ethers.isAddress(healthCheckAddress)) {
+      toast.error('Please enter a valid address');
+      return;
+    }
+
+    try {
+      setIsHealthLoading(true);
+
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      const contract = new ethers.Contract(LENDING_BORROWING_ADDRESS, LENDING_BORROWING_ABI, signer);
+
+      const [
+        ethPrice,
+        collateralUsd,
+        loanUsd,
+        ltv,
+        status
+      ] = await contract.checkCollateralHealth(healthCheckAddress);
+
+      setCollateralHealth({
+        ethPrice,
+        collateralUsd,
+        loanUsd,
+        ltv,
+        status
+      });
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to check collateral health');
+    } finally {
+      setIsHealthLoading(false);
+    }
+  };
+
+  const handleLiquidate = async () => {
+    if (!collateralHealth || collateralHealth.ltv < 8000) {
+      toast.error('This user is not eligible for liquidation');
+      return;
+    }
+
+    try {
+      setIsLiquidating(true);
+
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      const contract = new ethers.Contract(LENDING_BORROWING_ADDRESS, LENDING_BORROWING_ABI, signer);
+
+      const YOK_TOKEN = "0x4e9097fa54f0a31f4c049ddb4092f0a7503f908e"; // update if needed
+
+      const tx = await contract.liquidateBorrower(healthCheckAddress, YOK_TOKEN);
+      await tx.wait();
+
+      toast.success('Liquidation successful!');
+      setCollateralHealth(null);
+      setHealthCheckAddress('');
+    } catch (error) {
+      console.error(error);
+      toast.error('Liquidation failed');
+    } finally {
+      setIsLiquidating(false);
+    }
+  };
+
 
 
   const handleConfirmCollateral = async () => {
@@ -430,7 +550,111 @@ const Dashboard = () => {
           </div>
         </div>
       )}
+
+
+      {/* Collateral Health Check & Liquidation Section */}
+      <div className="mt-12">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Collateral Health & Liquidation</h2>
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 space-y-4">
+          {/* Address Input & Check Button */}
+          <div className="flex items-center space-x-4">
+            <input
+              type="text"
+              placeholder="Enter borrower’s address"
+              value={healthCheckAddress}
+              onChange={(e) => setHealthCheckAddress(e.target.value)}
+              className="flex-1 px-4 py-2 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+            />
+            <button
+              onClick={checkHealth}
+              disabled={isHealthLoading}
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            >
+              {isHealthLoading ? 'Checking...' : 'Check Health'}
+            </button>
+          </div>
+
+          {/* Display Health Results */}
+          {collateralHealth && (
+            <div className="bg-gray-50 dark:bg-gray-900/30 border border-gray-200 dark:border-gray-700 rounded p-4 space-y-2">
+              <div className="text-sm text-gray-800 dark:text-gray-100">
+                <p><strong>ETH Price:</strong> ${Number(collateralHealth.ethPrice).toFixed(2)}</p>
+                <p><strong>Collateral Value:</strong> ${(Number(collateralHealth.collateralUsd) / 1e18).toFixed(2)}</p>
+                <p><strong>Loan Value YOK Token Worth:</strong> ${(Number(collateralHealth.loanUsd) / 1e18).toFixed(2)}</p>
+                <p><strong>LTV:</strong> {(Number(collateralHealth.ltv) / 100).toFixed(2)}%</p>
+                <p>
+                  <strong>Status:</strong>{' '}
+                  <span className={`font-semibold ${Number(collateralHealth.ltv) >= 8000
+                    ? 'text-red-600'
+                    : Number(collateralHealth.ltv) >= 7000
+                      ? 'text-yellow-500'
+                      : 'text-green-600'
+                    }`}>
+                    {collateralHealth.status}
+                  </span>
+                </p>
+              </div>
+
+              {/* Show Liquidate Button if needed */}
+              {Number(collateralHealth.ltv) >= 8000 && (
+                <div className="pt-4">
+                  <button
+                    onClick={handleLiquidate}
+                    disabled={isLiquidating}
+                    className="w-full px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
+                  >
+                    {isLiquidating ? 'Liquidating...' : '⚠ Liquidate Borrower'}
+                  </button>
+                  <p className="mt-2 text-xs text-gray-600 dark:text-gray-400">
+                    Liquidation allowed when LTV is 80% or higher. Liquidator repays loan in YOK and receives borrower's ETH minus a 5% fee.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+
       {/* <AssetDetails /> */}
+
+      {/* All Users' Collateral Health */}
+      {/* <div className="mt-12">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">All Borrowers' Collateral Health</h2>
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+          {isLoading ? (
+            <p className="text-gray-600 dark:text-gray-300">Loading health data...</p>
+          ) : userHealthData.length === 0 ? (
+            <p className="text-gray-600 dark:text-gray-300">No data available.</p>
+          ) : (
+            <table className="min-w-full text-left table-auto">
+              <thead className="border-b border-gray-200 dark:border-gray-700">
+                <tr className="text-sm text-gray-600 dark:text-gray-300">
+                  <th className="py-2">Address</th>
+                  <th className="py-2">ETH Price</th>
+                  <th className="py-2">Collateral ($)</th>
+                  <th className="py-2">Loan ($)</th>
+                  <th className="py-2">LTV (%)</th>
+                  <th className="py-2">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {userHealthData.map((user, i) => (
+                  <tr key={i} className="text-sm border-b border-gray-100 dark:border-gray-700 text-gray-900 dark:text-gray-100">
+                    <td className="py-2 break-all">{user.address}</td>
+                    <td className="py-2">${user.ethPrice.toFixed(2)}</td>
+                    <td className="py-2">${user.collateralUsd.toFixed(2)}</td>
+                    <td className="py-2">${user.loanUsd.toFixed(2)}</td>
+                    <td className="py-2">{user.ltv.toFixed(2)}%</td>
+                    <td className="py-2">{user.status}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </div> */}
+
 
       {/* Info Card */}
       <div className="mt-8 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6">
