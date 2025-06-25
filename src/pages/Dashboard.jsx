@@ -88,6 +88,33 @@ const Dashboard = () => {
     }
   };
 
+  const handleRedeem = async () => {
+    if (!contract) {
+      toast.error('Contract not connected');
+      return;
+    }
+
+    try {
+      setIsSupplying(true); // reuse the same loading state
+
+      const tx = await contract.redeemaToken();
+      await tx.wait();
+
+      toast.success('Redeemed successfully! ETH returned to your wallet');
+
+      // Refresh balances
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const newContractBalance = await provider.getBalance(LENDING_BORROWING_ADDRESS);
+      const newWalletBalance = await provider.getBalance(address);
+      setContractBalance(ethers.formatEther(newContractBalance));
+      setWalletEthBalance(ethers.formatEther(newWalletBalance));
+    } catch (err) {
+      console.error(err);
+      toast.error('Redeem transaction failed');
+    } finally {
+      setIsSupplying(false);
+    }
+  };
 
 
   if (!isConnected) {
@@ -157,12 +184,23 @@ const Dashboard = () => {
                   </div>
                 </td>
                 <td className="px-6 py-4 text-right text-sm">
-                  <button
-                    onClick={handleSupply}
-                    className="px-3 py-1 rounded-md text-sm font-medium bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/30"
-                  >
-                    Supply
-                  </button>
+                  <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2 justify-end">
+                    <button
+                      onClick={handleSupply}
+                      className="px-3 py-1 rounded-md text-sm font-medium bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/30"
+                    >
+                      Supply
+                    </button>
+                    <button
+                      onClick={handleRedeem}
+                      disabled={isSupplying}
+                      className="px-3 py-1 rounded-md text-sm font-medium bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-900/30 disabled:opacity-50"
+                    >
+                      {isSupplying ? 'Processing...' : 'Redeem'}
+                    </button>
+                  </div>
+
+
                 </td>
               </tr>
             </tbody>
@@ -211,6 +249,7 @@ const Dashboard = () => {
               >
                 {isSupplying ? 'Supplying...' : 'Confirm Supply'}
               </button>
+
             </div>
           </div>
         </div>
