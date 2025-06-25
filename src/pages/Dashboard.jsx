@@ -43,12 +43,12 @@ const Dashboard = () => {
         const browserProvider = new ethers.BrowserProvider(window.ethereum);
         setProvider(browserProvider);
 
-        try {
-          const data = await fetchUserCollateralHealth(browserProvider, START_BLOCK);
-          setUserData(data);
-        } catch (error) {
-          console.error("Failed to fetch user health data:", error);
-        }
+        // try {
+        //   const data = await fetchUserCollateralHealth(browserProvider, START_BLOCK);
+        //   setUserData(data);
+        // } catch (error) {
+        //   console.error("Failed to fetch user health data:", error);
+        // }
       }
     };
 
@@ -56,39 +56,39 @@ const Dashboard = () => {
   }, []);
 
 
-  async function fetchUserCollateralHealth(fromBlock, toBlock = "latest") {
-    const providers = new ethers.JsonRpcApiProvider(RPC_URL);
-    const lending = new ethers.Contract(
-      LENDING_BORROWING_ADDRESS, LENDING_BORROWING_ABI, providers)
-    const filter = lending.filters.MessageSent(); // event filter
-    const events = await lending.queryFilter(filter, fromBlock, toBlock);
+  // async function fetchUserCollateralHealth(fromBlock, toBlock = "latest") {
+  //   const providers = new ethers.JsonRpcApiProvider(RPC_URL);
+  //   const lending = new ethers.Contract(
+  //     LENDING_BORROWING_ADDRESS, LENDING_BORROWING_ABI, providers)
+  //   const filter = lending.filters.MessageSent(); // event filter
+  //   const events = await lending.queryFilter(filter, fromBlock, toBlock);
 
-    // Extract unique borrower addresses
-    const uniqueAddresses = [...new Set(events.map(e => e.args[2]))]; // e.args[2] = msg.sender
+  //   // Extract unique borrower addresses
+  //   const uniqueAddresses = [...new Set(events.map(e => e.args[2]))]; // e.args[2] = msg.sender
 
-    // Query each user's health
-    const userHealthData = await Promise.allSettled(
-      uniqueAddresses.map(async (user) => {
-        try {
-          const [ethPrice, collateralUsd, loanUsd, ltv, status] = await lending.checkCollateralHealth(user);
-          return {
-            address: user,
-            ethPrice: Number(ethPrice),
-            collateralUsd: Number(collateralUsd),
-            loanUsd: Number(loanUsd),
-            ltv: Number(ltv) / 100, // Convert BPS to %
-            status
-          };
-        } catch (err) {
-          return null; // skip if no collateral or fails
-        }
-      })
-    );
+  //   // Query each user's health
+  //   const userHealthData = await Promise.allSettled(
+  //     uniqueAddresses.map(async (user) => {
+  //       try {
+  //         const [ethPrice, collateralUsd, loanUsd, ltv, status] = await lending.checkCollateralHealth(user);
+  //         return {
+  //           address: user,
+  //           ethPrice: Number(ethPrice),
+  //           collateralUsd: Number(collateralUsd),
+  //           loanUsd: Number(loanUsd),
+  //           ltv: Number(ltv) / 100, // Convert BPS to %
+  //           status
+  //         };
+  //       } catch (err) {
+  //         return null; // skip if no collateral or fails
+  //       }
+  //     })
+  //   );
 
-    return userHealthData
-      .filter(res => res.status === "fulfilled" && res.value)
-      .map(res => res.value);
-  }
+  //   return userHealthData
+  //     .filter(res => res.status === "fulfilled" && res.value)
+  //     .map(res => res.value);
+  // }
 
   const checkHealth = async () => {
     if (!healthCheckAddress || !ethers.isAddress(healthCheckAddress)) {
@@ -140,6 +140,11 @@ const Dashboard = () => {
       const contract = new ethers.Contract(LENDING_BORROWING_ADDRESS, LENDING_BORROWING_ABI, signer);
 
       const YOK_TOKEN = "0x4e9097fa54f0a31f4c049ddb4092f0a7503f908e"; // update if needed
+      const amountToApproveFirst = await contract.userCollateral(address);
+      const getAmount = amountToApproveFirst.loanAmount;
+      const yokToken = new ethers.Contract(YOK_TOKEN, COMNINED_ABI, signer);
+      const approval = await yokToken.approve(LENDING_BORROWING_ADDRESS, getAmount);
+      await approval.wait();
 
       const tx = await contract.liquidateBorrower(healthCheckAddress, YOK_TOKEN);
       await tx.wait();
@@ -570,7 +575,7 @@ const Dashboard = () => {
               disabled={isHealthLoading}
               className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
             >
-              {isHealthLoading ? 'Checking...' : 'Check Health'}
+              {isHealthLoading ? 'Checking...' : 'Liquidate'}
             </button>
           </div>
 
