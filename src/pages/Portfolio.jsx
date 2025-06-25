@@ -3,11 +3,16 @@ import { useAccount, useChainId } from 'wagmi';
 import { TrendingUp, TrendingDown, AlertTriangle, DollarSign, PieChart, Activity } from 'lucide-react';
 import { getUserPortfolio } from '../utils/mockData';
 import { SUPPORTED_CHAINS } from '../config/wagmi';
-
+import { ethers } from 'ethers';
+import { LENDING_BORROWING_ADDRESS, LENDING_BORROWING_ABI } from '../constants/lending_borrowing';
 const Portfolio = () => {
   const [portfolio, setPortfolio] = useState(null);
   const [loading, setLoading] = useState(true);
   const { address, isConnected } = useAccount();
+  const [ethDeposited, setEthDeposited] = useState(null); // Step 1: Hook
+  const [yokDeposited, setYokDeposited] = useState(null); // Step 1: Hook
+  const [health, setHealth] = useState(null); // Step 1: Hook
+
   const chainId = useChainId();
 
   useEffect(() => {
@@ -17,6 +22,27 @@ const Portfolio = () => {
         if (isConnected && address) {
           const portfolioData = await getUserPortfolio(address);
           setPortfolio(portfolioData);
+          const provider = new ethers.BrowserProvider(window.ethereum);
+          const contract = new ethers.Contract(LENDING_BORROWING_ADDRESS, LENDING_BORROWING_ABI, provider);
+          const userBalance = await contract.userCollateral(address);
+          const ethDepositedWei = userBalance.ethAmount;
+          const ethDepositedFormatted = ethers.formatEther(ethDepositedWei); // Step 2
+          console.log("User deposited ETH:", ethDepositedFormatted);
+          setEthDeposited(ethDepositedFormatted); // Step 3
+          const yokDepositedWei = userBalance.loanAmount;
+          const yokDepositedFormatted = ethers.formatEther(yokDepositedWei);
+          setYokDeposited(yokDepositedFormatted); // Step 3
+          console.log("User deposited YOK:", yokDepositedFormatted);
+          const [
+            currentEthPrice,
+            currentCollateralUsdValue,
+            loanValue,
+            ltvBasisPoints,
+            healthStatus
+          ] = await contract.checkCollateralHealth(address);
+
+          console.log("Health Status:", healthStatus);
+          setHealth(healthStatus); // Step 4
         }
       } catch (error) {
         console.error('Error loading portfolio:', error);
@@ -57,12 +83,12 @@ const Portfolio = () => {
   }
 
   const healthFactorColor = portfolio?.healthFactor >= 2 ? 'text-green-600 dark:text-green-400' :
-                            portfolio?.healthFactor >= 1.5 ? 'text-yellow-600 dark:text-yellow-400' :
-                            'text-red-600 dark:text-red-400';
+    portfolio?.healthFactor >= 1.5 ? 'text-yellow-600 dark:text-yellow-400' :
+      'text-red-600 dark:text-red-400';
 
   const healthFactorBg = portfolio?.healthFactor >= 2 ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' :
-                         portfolio?.healthFactor >= 1.5 ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' :
-                         'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800';
+    portfolio?.healthFactor >= 1.5 ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' :
+      'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800';
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -99,32 +125,32 @@ const Portfolio = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Supplied</p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">${portfolio?.totalSupplied || '0.00'}</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">{ethDeposited || '0.00'} ETH</p>
                 </div>
                 <div className="p-3 bg-green-100 dark:bg-green-900/20 rounded-lg">
                   <TrendingUp className="w-6 h-6 text-green-600 dark:text-green-400" />
                 </div>
               </div>
-              <div className="mt-4 flex items-center text-sm">
+              {/* <div className="mt-4 flex items-center text-sm">
                 <span className="text-green-600 dark:text-green-400 font-medium">+${portfolio?.estimatedEarnings || '0.00'}</span>
                 <span className="text-gray-500 dark:text-gray-400 ml-2">estimated earnings</span>
-              </div>
+              </div> */}
             </div>
 
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Borrowed</p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">${portfolio?.totalBorrowed || '0.00'}</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Borrowed YOK token</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">{yokDeposited || '0.00'} YOK</p>
                 </div>
                 <div className="p-3 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
                   <TrendingDown className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                 </div>
               </div>
-              <div className="mt-4 flex items-center text-sm">
+              {/* <div className="mt-4 flex items-center text-sm">
                 <span className="text-blue-600 dark:text-blue-400 font-medium">{portfolio?.borrowUtilization || '0'}%</span>
                 <span className="text-gray-500 dark:text-gray-400 ml-2">utilization</span>
-              </div>
+              </div> */}
             </div>
 
             <div className={`rounded-lg shadow-sm border p-6 ${healthFactorBg}`}>
@@ -132,24 +158,23 @@ const Portfolio = () => {
                 <div>
                   <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Health Factor</p>
                   <p className={`text-2xl font-bold ${healthFactorColor}`}>
-                    {portfolio?.healthFactor ? portfolio.healthFactor.toFixed(2) : '∞'}
+                    {health}
                   </p>
                 </div>
-                <div className={`p-3 rounded-lg ${
-                  portfolio?.healthFactor >= 2 ? 'bg-green-100 dark:bg-green-900/20' :
+                <div className={`p-3 rounded-lg ${portfolio?.healthFactor >= 2 ? 'bg-green-100 dark:bg-green-900/20' :
                   portfolio?.healthFactor >= 1.5 ? 'bg-yellow-100 dark:bg-yellow-900/20' :
-                  'bg-red-100 dark:bg-red-900/20'
-                }`}>
+                    'bg-red-100 dark:bg-red-900/20'
+                  }`}>
                   <Activity className={`w-6 h-6 ${healthFactorColor}`} />
                 </div>
               </div>
-              <div className="mt-4 flex items-center text-sm">
+              {/* <div className="mt-4 flex items-center text-sm">
                 <span className={`font-medium ${healthFactorColor}`}>
-                  {portfolio?.healthFactor >= 2 ? 'Healthy' :
-                   portfolio?.healthFactor >= 1.5 ? 'Moderate Risk' :
-                   'High Risk'}
+                  {health >= 2 ? 'Healthy' :
+                    health >= 1.5 ? 'Moderate Risk' :
+                      'High Risk'}
                 </span>
-              </div>
+              </div> */}
             </div>
           </div>
 
