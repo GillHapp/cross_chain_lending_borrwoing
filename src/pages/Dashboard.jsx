@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAccount, useChainId } from 'wagmi';
-import { TrendingUp, ExternalLink, Info } from 'lucide-react';
+import { TrendingUp, ExternalLink, Info, TrendingDown } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { SUPPORTED_CHAINS } from '../config/wagmi';
 import { ethers } from 'ethers';
 import { LENDING_BORROWING_ADDRESS, LENDING_BORROWING_ABI } from '../constants/lending_borrowing.js';
+import { COMNINED_ABI } from '../constants/cross_chain_token.js';
 import AssetDetails from './AssetDetail';
 const Dashboard = () => {
-  const [activeTab, setActiveTab] = useState('supply');
   const { address, isConnected } = useAccount();
   const chainId = useChainId();
 
@@ -20,6 +20,69 @@ const Dashboard = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [supplyAmount, setSupplyAmount] = useState('');
   const [isSupplying, setIsSupplying] = useState(false);
+
+  const [isBorrowing, setIsBorrowing] = useState(false);
+
+  const [provider, setProvider] = useState(null);
+  const [yokBalance, setYokBalance] = useState(null);
+  const [collateralAmount, setCollateralAmount] = useState('');
+  const [isCollateralModalOpen, setIsCollateralModalOpen] = useState(false);
+
+
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.ethereum) {
+      setProvider(new ethers.BrowserProvider(window.ethereum));
+    }
+  }, []);
+
+
+  const handleConfirmCollateral = async () => {
+    if (!collateralAmount || isNaN(collateralAmount) || Number(collateralAmount) <= 0) {
+      toast.error("Please enter a valid ETH amount");
+      return;
+    }
+
+    try {
+      setIsBorrowing(true);
+
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      const contract = new ethers.Contract(
+        LENDING_BORROWING_ADDRESS,
+        LENDING_BORROWING_ABI,
+        signer
+      );
+
+      const destinationChainSelector = "14767482510784806043"; // example: Sepolia selector
+      const receiver = "0xD1ae674f6332Ae704125271238e192ffaFb0fbfB"; // change this to the correct receiver
+      const message = "Loan Request";
+      const tokenAddress = "0x4e9097fa54f0a31f4c049ddb4092f0a7503f908e"; // YOK token address
+
+      const tx = await contract.sendMessageWithCollateralInETH(
+        destinationChainSelector,
+        receiver,
+        message,
+        tokenAddress,
+        {
+          value: ethers.parseEther(collateralAmount),
+        }
+      );
+
+      await tx.wait();
+
+      toast.success("Collateral deposited and YOK message sent!");
+      setCollateralAmount('');
+      setIsCollateralModalOpen(false);
+    } catch (err) {
+      console.error(err);
+      toast.error("Collateral deposit failed");
+    } finally {
+      setIsBorrowing(false);
+    }
+  };
+
+
 
   const currentChain = SUPPORTED_CHAINS[chainId];
 
@@ -40,6 +103,15 @@ const Dashboard = () => {
 
           const userBalance = await provider.getBalance(address);
           setWalletEthBalance(ethers.formatEther(userBalance));
+
+          const yokContract = new ethers.Contract(
+            "0x4e9097fa54f0a31f4c049ddb4092f0a7503f908e",
+            COMNINED_ABI,
+            provider
+          );
+
+          const yokBal = await yokContract.balanceOf(address);
+          setYokBalance(ethers.formatUnits(yokBal, 18));
         } catch (error) {
           console.error('Error initializing contract:', error);
           toast.error('Failed to connect to contract');
@@ -117,6 +189,8 @@ const Dashboard = () => {
   };
 
 
+
+
   if (!isConnected) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -145,12 +219,48 @@ const Dashboard = () => {
         )}
       </div>
 
+
+      {
+        isCollateralModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+            <div className="bg-white dark:bg-gray-800 p-6 rounded shadow-lg w-full max-w-md">
+              <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Deposit Collateral (ETH)</h2>
+              <input
+                type="number"
+                placeholder="Enter amount in ETH"
+                value={collateralAmount}
+                onChange={(e) => setCollateralAmount(e.target.value)}
+                className="w-full mb-4 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                min="0"
+                step="0.0001"
+              />
+              <div className="flex justify-end space-x-2">
+                <button
+                  onClick={() => setIsCollateralModalOpen(false)}
+                  className="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleConfirmCollateral}
+                  disabled={isBorrowing}
+                  className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
+                >
+                  {isBorrowing ? 'Depositing...' : 'Confirm Deposit'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )
+      }
+
       {/* Asset Table */}
       <div className="flex items-center space-x-3 mb-4">
         <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
-          🏦 Lending
+          Lending
         </h2>
-      </div>      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+      </div>
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
             <thead className="bg-gray-50 dark:bg-gray-900/50">
@@ -203,8 +313,6 @@ const Dashboard = () => {
                       {isSupplying ? 'Processing...' : 'Redeem'}
                     </button>
                   </div>
-
-
                 </td>
               </tr>
             </tbody>
@@ -222,6 +330,70 @@ const Dashboard = () => {
         <p className="mt-2 text-sm">
           You can do this in MetaMask by clicking “Import Tokens” and pasting the address above.
         </p>
+      </div>
+
+      {/* Borrowing Table */}
+      <div className="flex items-center space-x-3 mt-12 mb-4">
+        <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
+          Borrowing
+        </h2>
+      </div>
+
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead className="bg-gray-50 dark:bg-gray-900/50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Collateral</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Borrowed YOK</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Collateral</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Interest / Month</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+
+            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+              <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="flex items-center">
+                    <div className="h-8 w-8 rounded-full bg-yellow-500 flex items-center justify-center text-white font-bold">ETH</div>
+                    <div className="ml-4">
+                      <div className="text-sm font-medium text-gray-900 dark:text-white">Ethereum</div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400">ETH • {currentChain?.name}</div>
+                    </div>
+                  </div>
+                </td>
+                <td className="px-6 py-4 text-sm text-gray-900 dark:text-white">
+                  {yokBalance !== null ? `${Number(yokBalance).toFixed(2)} YOK` : 'Loading...'}
+                </td>
+                <td className="px-6 py-4 text-sm text-gray-900 dark:text-white">
+                  {contractBalance !== null ? `${Number(contractBalance).toFixed(4)} ETH` : 'Loading...'}
+                </td>
+                <td className="px-6 py-4">
+                  <div className="flex items-center">
+                    <TrendingDown className="w-4 h-4 text-red-500 mr-1" />
+                    <span className="text-sm font-medium text-red-600 dark:text-red-400">
+                      2.00%
+                    </span>
+                  </div>
+                </td>
+
+
+                <td className="px-6 py-4 text-right text-sm">
+                  <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2 justify-end">
+                    <button
+                      onClick={() => setIsCollateralModalOpen(true)}
+                      className="px-3 py-1 rounded-md text-sm font-medium bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/30"
+                    >
+                      Deposit Collateral
+                    </button>
+
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
 
 
