@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom';
-import { 
-  ArrowRight, 
-  Zap, 
-  Shield, 
-  Globe, 
+import {
+  ArrowRight,
+  Zap,
+  Shield,
+  Globe,
   TrendingUp,
   Github,
   MessageCircle,
@@ -31,24 +31,13 @@ const LandingPage = () => {
               <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
                 <Zap className="w-5 h-5 text-white" />
               </div>
-              <span className="text-xl font-bold text-gray-900 dark:text-white">CrossChainLend</span>
+              <span className="text-xl font-bold text-gray-900 dark:text-white">BridgeFi</span>
             </div>
-            
             <div className="flex items-center space-x-4">
-              <button
-                onClick={toggleTheme}
-                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-              >
-                {theme === 'light' ? 
-                  <Moon className="w-5 h-5 text-gray-600 dark:text-gray-400" /> : 
-                  <Sun className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-                }
+              <button onClick={toggleTheme} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                {theme === 'light' ? <Moon className="w-5 h-5 text-gray-600" /> : <Sun className="w-5 h-5 text-gray-400" />}
               </button>
-              
-              <Link
-                to="/app"
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2"
-              >
+              <Link to="/app" className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium flex items-center space-x-2">
                 <span>Enter App</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
@@ -57,7 +46,7 @@ const LandingPage = () => {
         </div>
       </header>
 
-      {/* Hero Section */}
+      {/* Hero */}
       <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto text-center">
           <h1 className="text-5xl md:text-7xl font-bold text-gray-900 dark:text-white mb-6">
@@ -65,28 +54,18 @@ const LandingPage = () => {
             <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"> DeFi</span>
             <br />Lending Protocol
           </h1>
-          
           <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-12 max-w-4xl mx-auto">
-            Lend and borrow assets across multiple blockchains with the power of Chainlink's Cross-Chain Interoperability Protocol (CCIP)
+            Lend ETH on Sepolia, borrow custom USD-pegged tokens on Avalanche, and manage your cross-chain DeFi position with Chainlink CCIP.
           </p>
-          
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
-            <Link
-              to="/app"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-colors flex items-center space-x-2"
-            >
+            <Link to="/app" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-lg font-semibold text-lg flex items-center space-x-2">
               <span>Start Lending</span>
               <ArrowRight className="w-5 h-5" />
             </Link>
-            
-            <button
-              onClick={() => scrollToSection('how-it-works')}
-              className="border-2 border-gray-300 dark:border-gray-600 hover:border-blue-600 dark:hover:border-blue-400 text-gray-700 dark:text-gray-300 px-8 py-4 rounded-lg font-semibold text-lg transition-colors"
-            >
+            <button onClick={() => scrollToSection('how-it-works')} className="border-2 border-gray-300 dark:border-gray-600 hover:border-blue-600 dark:hover:border-blue-400 text-gray-700 dark:text-gray-300 px-8 py-4 rounded-lg font-semibold text-lg">
               Learn More
             </button>
           </div>
-          
           <div className="animate-bounce">
             <ChevronDown className="w-8 h-8 text-gray-400 mx-auto cursor-pointer" onClick={() => scrollToSection('how-it-works')} />
           </div>
@@ -99,38 +78,35 @@ const LandingPage = () => {
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">How It Works</h2>
             <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-              CrossChainLend leverages Chainlink CCIP to enable seamless lending and borrowing across different blockchains
+              BridgeFi uses Chainlink CCIP and decentralized oracles to enable trustless lending and borrowing across chains like Ethereum and Avalanche.
             </p>
           </div>
-          
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center p-8 rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border border-blue-200 dark:border-blue-800">
+            <div className="text-center p-8 rounded-2xl bg-blue-100 dark:bg-blue-900/20 border dark:border-blue-800">
               <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
                 <TrendingUp className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">Supply Assets</h3>
+              <h3 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">ETH Lending</h3>
               <p className="text-gray-600 dark:text-gray-300">
-                Deposit your crypto assets to earn competitive interest rates. Your assets are secured by smart contracts and earn yield automatically.
+                Lenders deposit ETH on Sepolia and receive a receipt token. Later, they can redeem their ETH by returning the token.
               </p>
             </div>
-            
-            <div className="text-center p-8 rounded-2xl bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border border-purple-200 dark:border-purple-800">
+            <div className="text-center p-8 rounded-2xl bg-purple-100 dark:bg-purple-900/20 border dark:border-purple-800">
               <div className="w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Globe className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">Cross-Chain Collateral</h3>
+              <h3 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">Cross-Chain Borrowing</h3>
               <p className="text-gray-600 dark:text-gray-300">
-                Use your deposited assets as collateral to borrow on different chains. Chainlink CCIP handles the cross-chain communication securely.
+                Borrowers lock ETH on Sepolia and mint custom USD-pegged tokens on Avalanche via Chainlink CCIP bridge.
               </p>
             </div>
-            
-            <div className="text-center p-8 rounded-2xl bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-900/20 dark:to-emerald-800/20 border border-emerald-200 dark:border-emerald-800">
+            <div className="text-center p-8 rounded-2xl bg-emerald-100 dark:bg-emerald-900/20 border dark:border-emerald-800">
               <div className="w-16 h-16 bg-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Shield className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">Secure Borrowing</h3>
+              <h3 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">Liquidation & Repay</h3>
               <p className="text-gray-600 dark:text-gray-300">
-                Borrow assets on any supported chain while your collateral remains secure. Automated liquidation protects the protocol and lenders.
+                Check collateral health, liquidate risky positions, and repay borrowed tokens to reclaim your ETH collateral.
               </p>
             </div>
           </div>
@@ -143,68 +119,47 @@ const LandingPage = () => {
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold mb-4">Cross-Chain Flow</h2>
             <p className="text-xl opacity-90 max-w-3xl mx-auto">
-              Experience seamless lending and borrowing across Ethereum and Avalanche networks
+              End-to-end flow of collateral, token minting, and redemption across Ethereum Sepolia and Avalanche Fuji.
             </p>
           </div>
-          
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="grid lg:grid-cols-2 gap-12 items-start">
             <div className="space-y-8">
-              <div className="flex items-start space-x-4">
-                <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                  <span className="text-sm font-bold">1</span>
+              {[
+                ['Connect Wallet', 'User connects to Sepolia testnet and approves access.'],
+                ['Lend ETH', 'Deposit ETH and receive a receipt token used for redeeming later.'],
+                ['Mint Custom Token', 'Use ETH as collateral and mint YOR (USD-pegged) token on Avalanche.'],
+                ['Check Borrow Limit', 'Enter address to view available minting amount.'],
+                ['Transfer Token', 'Bridge YOR token to user Avalanche address.'],
+                ['Health Check & Liquidate', 'Monitor user health factor and liquidate if needed.'],
+                ['Repay Loan', 'Deposit YOR token on Avalanche and trigger unlock on Sepolia.'],
+                ['Redeem ETH', 'Withdraw ETH by burning your receipt token.']
+              ].map(([title, text], i) => (
+                <div key={i} className="flex items-start space-x-4">
+                  <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                    <span className="text-sm font-bold">{i + 1}</span>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold mb-2">{title}</h3>
+                    <p className="opacity-90">{text}</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-xl font-semibold mb-2">Lend ETH on Sepolia</h3>
-                  <p className="opacity-90">Deposit ETH on Sepolia testnet and receive receipt tokens representing your deposit plus accrued interest.</p>
-                </div>
-              </div>
-              
-              <div className="flex items-start space-x-4">
-                <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                  <span className="text-sm font-bold">2</span>
-                </div>
-                <div>
-                  <h3 className="text-xl font-semibold mb-2">Cross-Chain Collateral</h3>
-                  <p className="opacity-90">Your ETH deposit automatically becomes available as collateral for borrowing on Avalanche testnet.</p>
-                </div>
-              </div>
-              
-              <div className="flex items-start space-x-4">
-                <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                  <span className="text-sm font-bold">3</span>
-                </div>
-                <div>
-                  <h3 className="text-xl font-semibold mb-2">Borrow on Avalanche</h3>
-                  <p className="opacity-90">Borrow custom tokens on Avalanche while your ETH remains securely locked as collateral on Sepolia.</p>
-                </div>
-              </div>
-              
-              <div className="flex items-start space-x-4">
-                <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                  <span className="text-sm font-bold">4</span>
-                </div>
-                <div>
-                  <h3 className="text-xl font-semibold mb-2">Repay & Redeem</h3>
-                  <p className="opacity-90">Repay your loan on Avalanche to unlock your collateral, then redeem your ETH plus interest on Sepolia.</p>
-                </div>
-              </div>
+              ))}
             </div>
-            
             <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20">
               <h3 className="text-2xl font-bold mb-6 text-center">Powered by Chainlink</h3>
               <div className="space-y-4">
                 <div className="flex items-center justify-between p-4 bg-white/10 rounded-lg">
-                  <span className="font-medium">CCIP Cross-Chain</span>
+                  <span className="font-medium">CCIP Messaging</span>
                   <Zap className="w-5 h-5" />
                 </div>
                 <div className="flex items-center justify-between p-4 bg-white/10 rounded-lg">
                   <span className="font-medium">Price Feeds</span>
                   <TrendingUp className="w-5 h-5" />
                 </div>
-                <div className="flex items-center justify-between p-4 bg-white/10 rounded-lg">
+                {/* <div className="flex items-center justify-between p-4 bg-white/10 rounded-lg">
                   <span className="font-medium">Automation</span>
                   <Shield className="w-5 h-5" />
-                </div>
+                </div> */}
               </div>
             </div>
           </div>
@@ -216,64 +171,64 @@ const LandingPage = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-8">Built with Chainlink</h2>
           <p className="text-xl text-gray-600 dark:text-gray-300 mb-12 max-w-3xl mx-auto">
-            CrossChainLend leverages multiple Chainlink services to deliver a secure, reliable, and truly decentralized cross-chain lending experience
+            Secure, decentralized infrastructure using Chainlink’s Cross-Chain Interoperability Protocol, Price Feed.
           </p>
-          
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="p-8 rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50">
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">CCIP</h3>
-              <p className="text-gray-600 dark:text-gray-300">Cross-Chain Interoperability Protocol enables secure message and token transfers between chains</p>
+            <div className="p-8 rounded-2xl border dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50">
+              <h3 className="text-xl font-semibold dark:text-white mb-4">CCIP</h3>
+              <p className="text-gray-600 dark:text-gray-300">Reliable cross-chain messaging and token bridging for asset flow.</p>
             </div>
-            <div className="p-8 rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50">
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Price Feeds</h3>
-              <p className="text-gray-600 dark:text-gray-300">Decentralized price oracles provide accurate, tamper-proof asset pricing for liquidations</p>
+            <div className="p-8 rounded-2xl border dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50">
+              <h3 className="text-xl font-semibold dark:text-white mb-4">Price Feeds</h3>
+              <p className="text-gray-600 dark:text-gray-300">Protects the protocol during liquidations with real-time ETH/USD pricing.</p>
             </div>
-            <div className="p-8 rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50">
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Automation</h3>
-              <p className="text-gray-600 dark:text-gray-300">Automated liquidations and interest rate updates ensure protocol health and efficiency</p>
-            </div>
+            {/* <div className="p-8 rounded-2xl border dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50">
+              <h3 className="text-xl font-semibold dark:text-white mb-4">Automation</h3>
+              <p className="text-gray-600 dark:text-gray-300">Triggers liquidation, collateral checks, and contract calls automatically.</p>
+            </div> */}
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 dark:bg-black text-white py-16">
+      <footer className="bg-gray-900 text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center space-x-2 mb-8 md:mb-0">
               <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
                 <Zap className="w-5 h-5 text-white" />
               </div>
-              <span className="text-xl font-bold">CrossChainLend</span>
+              <span className="text-xl font-bold">BridgeFi</span>
             </div>
-            
             <div className="flex items-center space-x-6">
-              <a
-                href="#"
-                className="flex items-center space-x-2 hover:text-blue-400 transition-colors"
-              >
+              <a href="#" className="flex items-center space-x-2 hover:text-blue-400">
                 <FileText className="w-5 h-5" />
-                <span>Documentation</span>
+                <span>Docs</span>
               </a>
               <a
-                href="#"
-                className="flex items-center space-x-2 hover:text-blue-400 transition-colors"
+                href="https://discord.com/users/harpreetsingh3059"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center space-x-2 hover:text-blue-400"
               >
                 <MessageCircle className="w-5 h-5" />
                 <span>Discord</span>
               </a>
+
               <a
-                href="#"
-                className="flex items-center space-x-2 hover:text-blue-400 transition-colors"
+                href="https://github.com/GillHapp/cross_chain_lending_borrwoing"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center space-x-2 hover:text-blue-400"
               >
                 <Github className="w-5 h-5" />
                 <span>GitHub</span>
               </a>
+
             </div>
           </div>
-          
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 CrossChainLend. Built for Chainlink Hackathon.</p>
+            <p>&copy; 2025 BridgeFi. Built with ❤️ for Chainlink.</p>
           </div>
         </div>
       </footer>

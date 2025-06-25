@@ -23,28 +23,26 @@ const Navbar = () => {
             <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
               <Zap className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xl font-bold text-gray-900 dark:text-white">CrossChainLend</span>
+            <span className="text-xl font-bold text-gray-900 dark:text-white">BridgeFi</span>
           </Link>
 
           {/* Navigation Links */}
           <div className="hidden md:flex items-center space-x-8">
             <Link
               to="/app/dashboard"
-              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                isActive('/app/dashboard') || isActive('/app')
+              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${isActive('/app/dashboard') || isActive('/app')
                   ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20'
                   : 'text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400'
-              }`}
+                }`}
             >
               Dashboard
             </Link>
             <Link
               to="/app/portfolio"
-              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                isActive('/app/portfolio')
+              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${isActive('/app/portfolio')
                   ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20'
                   : 'text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400'
-              }`}
+                }`}
             >
               Portfolio
             </Link>
@@ -56,8 +54,8 @@ const Navbar = () => {
               onClick={toggleTheme}
               className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
             >
-              {theme === 'light' ? 
-                <Moon className="w-5 h-5 text-gray-600 dark:text-gray-400" /> : 
+              {theme === 'light' ?
+                <Moon className="w-5 h-5 text-gray-600 dark:text-gray-400" /> :
                 <Sun className="w-5 h-5 text-gray-600 dark:text-gray-400" />
               }
             </button>

@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 import { SUPPORTED_CHAINS } from '../config/wagmi';
 import { ethers } from 'ethers';
 import { LENDING_BORROWING_ADDRESS, LENDING_BORROWING_ABI } from '../constants/lending_borrowing.js';
-
+import AssetDetails from './AssetDetail';
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('supply');
   const { address, isConnected } = useAccount();
@@ -146,7 +146,11 @@ const Dashboard = () => {
       </div>
 
       {/* Asset Table */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <div className="flex items-center space-x-3 mb-4">
+        <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
+          🏦 Lending
+        </h2>
+      </div>      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
             <thead className="bg-gray-50 dark:bg-gray-900/50">
@@ -254,6 +258,7 @@ const Dashboard = () => {
           </div>
         </div>
       )}
+      {/* <AssetDetails /> */}
 
       {/* Info Card */}
       <div className="mt-8 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6">
