@@ -1,4 +1,4 @@
-export const REPAY_ADDRESS = "0xD1ae674f6332Ae704125271238e192ffaFb0fbfB";
+export const REPAY_ADDRESS = "0x1A0Cf6cACc5447469a3cb168cF76E91C706DFCcd";
 
 export const REPAY_ABI = [
     {

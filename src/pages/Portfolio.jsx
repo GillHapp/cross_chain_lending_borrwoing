@@ -5,6 +5,7 @@ import { getUserPortfolio } from '../utils/mockData';
 import { SUPPORTED_CHAINS } from '../config/wagmi';
 import { ethers } from 'ethers';
 import { LENDING_BORROWING_ADDRESS, LENDING_BORROWING_ABI } from '../constants/lending_borrowing';
+import { REPAY_ADDRESS, REPAY_ABI } from '../constants/repay';
 const Portfolio = () => {
   const [portfolio, setPortfolio] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -12,6 +13,9 @@ const Portfolio = () => {
   const [ethDeposited, setEthDeposited] = useState(null); // Step 1: Hook
   const [yokDeposited, setYokDeposited] = useState(null); // Step 1: Hook
   const [health, setHealth] = useState(null); // Step 1: Hook
+
+
+
 
   const chainId = useChainId();
 
@@ -22,17 +26,19 @@ const Portfolio = () => {
         if (isConnected && address) {
           const portfolioData = await getUserPortfolio(address);
           setPortfolio(portfolioData);
+
           const provider = new ethers.BrowserProvider(window.ethereum);
           const contract = new ethers.Contract(LENDING_BORROWING_ADDRESS, LENDING_BORROWING_ABI, provider);
+
           const userBalance = await contract.userCollateral(address);
           const ethDepositedWei = userBalance.ethAmount;
-          const ethDepositedFormatted = ethers.formatEther(ethDepositedWei); // Step 2
-          console.log("User deposited ETH:", ethDepositedFormatted);
-          setEthDeposited(ethDepositedFormatted); // Step 3
+          const ethDepositedFormatted = ethers.formatEther(ethDepositedWei);
+          setEthDeposited(ethDepositedFormatted);
+
           const yokDepositedWei = userBalance.loanAmount;
           const yokDepositedFormatted = ethers.formatEther(yokDepositedWei);
-          setYokDeposited(yokDepositedFormatted); // Step 3
-          console.log("User deposited YOK:", yokDepositedFormatted);
+          setYokDeposited(yokDepositedFormatted);
+          // setClaimableAmount(yokDepositedFormatted);
           const [
             currentEthPrice,
             currentCollateralUsdValue,
@@ -41,9 +47,11 @@ const Portfolio = () => {
             healthStatus
           ] = await contract.checkCollateralHealth(address);
 
-          console.log("Health Status:", healthStatus);
-          setHealth(healthStatus); // Step 4
+          setHealth(healthStatus);
         }
+
+
+
       } catch (error) {
         console.error('Error loading portfolio:', error);
       } finally {
@@ -54,7 +62,37 @@ const Portfolio = () => {
     loadPortfolio();
   }, [address, isConnected]);
 
+
   const currentChain = SUPPORTED_CHAINS[chainId];
+
+  const handleClaim = async () => {
+    if (!isConnected || !address) {
+      toast.error("Connect your wallet first");
+      return;
+    }
+
+    try {
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+
+      const repayContract = new ethers.Contract(
+        REPAY_ADDRESS,
+        REPAY_ABI,
+        signer
+      );
+
+      const tx = await repayContract.claimReceivedTokens(address);
+      // const userInfo = await repayContract.getUserReceipts(address);
+      await tx.wait();
+
+      toast.success("Tokens claimed successfully!");
+    } catch (err) {
+      console.error("Claim failed:", err);
+      toast.error("Claim failed. Check eligibility or try again.");
+    }
+  };
+
+
 
   if (!isConnected) {
     return (
@@ -131,11 +169,10 @@ const Portfolio = () => {
                   <TrendingUp className="w-6 h-6 text-green-600 dark:text-green-400" />
                 </div>
               </div>
-              {/* <div className="mt-4 flex items-center text-sm">
-                <span className="text-green-600 dark:text-green-400 font-medium">+${portfolio?.estimatedEarnings || '0.00'}</span>
-                <span className="text-gray-500 dark:text-gray-400 ml-2">estimated earnings</span>
-              </div> */}
+
             </div>
+
+
 
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
               <div className="flex items-center justify-between">
@@ -147,11 +184,10 @@ const Portfolio = () => {
                   <TrendingDown className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                 </div>
               </div>
-              {/* <div className="mt-4 flex items-center text-sm">
-                <span className="text-blue-600 dark:text-blue-400 font-medium">{portfolio?.borrowUtilization || '0'}%</span>
-                <span className="text-gray-500 dark:text-gray-400 ml-2">utilization</span>
-              </div> */}
+
             </div>
+
+
 
             <div className={`rounded-lg shadow-sm border p-6 ${healthFactorBg}`}>
               <div className="flex items-center justify-between">
@@ -168,13 +204,6 @@ const Portfolio = () => {
                   <Activity className={`w-6 h-6 ${healthFactorColor}`} />
                 </div>
               </div>
-              {/* <div className="mt-4 flex items-center text-sm">
-                <span className={`font-medium ${healthFactorColor}`}>
-                  {health >= 2 ? 'Healthy' :
-                    health >= 1.5 ? 'Moderate Risk' :
-                      'High Risk'}
-                </span>
-              </div> */}
             </div>
           </div>
 
@@ -195,75 +224,69 @@ const Portfolio = () => {
             </div>
           )}
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Your Supplies */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-              <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white">Your Supplies</h3>
-              </div>
-              <div className="p-6">
-                {portfolio?.supplies?.length ? (
-                  <div className="space-y-4">
-                    {portfolio.supplies.map((supply, index) => (
-                      <div key={index} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                        <div className="flex items-center space-x-3">
-                          <div className={`w-8 h-8 rounded-full ${supply.color} flex items-center justify-center`}>
-                            <span className="text-sm font-bold text-white">
-                              {supply.symbol.substring(0, 2)}
-                            </span>
-                          </div>
-                          <div>
-                            <p className="font-medium text-gray-900 dark:text-white">{supply.amount} {supply.symbol}</p>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">${supply.valueUSD}</p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-sm font-medium text-green-600 dark:text-green-400">{supply.apy}% APY</p>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">{supply.chain}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-gray-500 dark:text-gray-400 text-center py-8">No supplied assets</p>
-                )}
-              </div>
+
+
+          <div className="space-y-6 mt-8">
+
+            {/* Chain Switch Notice */}
+            <div className="flex items-center p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg">
+              <svg className="w-5 h-5 text-blue-600 dark:text-blue-300 mr-3" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path d="M17 16l4-4m0 0l-4-4m4 4H7"></path>
+              </svg>
+              <p className="text-sm text-blue-800 dark:text-blue-200">
+                Please switch to the <span className="font-medium">Avalanche</span> network to continue.
+              </p>
             </div>
 
-            {/* Your Borrows */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-              <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white">Your Borrows</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+
+              {/* Claim Rewards Card */}
+              <div className="flex flex-col justify-between bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-300 dark:border-yellow-700 rounded-lg p-6 shadow-sm">
+                <div>
+                  <h4 className="text-sm font-semibold text-yellow-800 dark:text-yellow-200 mb-1">Claim YOK Rewards</h4>
+                  <p className="text-sm text-yellow-700 dark:text-yellow-300">Rewards are available. Don’t miss your chance to claim your YOK tokens.</p>
+                </div>
+                <button
+                  onClick={handleClaim}
+                  className="mt-6 w-full px-4 py-2 text-sm font-semibold rounded bg-yellow-600 text-white hover:bg-yellow-700 transition"
+                >
+                  Claim YOK
+                </button>
               </div>
-              <div className="p-6">
-                {portfolio?.borrows?.length ? (
-                  <div className="space-y-4">
-                    {portfolio.borrows.map((borrow, index) => (
-                      <div key={index} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                        <div className="flex items-center space-x-3">
-                          <div className={`w-8 h-8 rounded-full ${borrow.color} flex items-center justify-center`}>
-                            <span className="text-sm font-bold text-white">
-                              {borrow.symbol.substring(0, 2)}
-                            </span>
-                          </div>
-                          <div>
-                            <p className="font-medium text-gray-900 dark:text-white">{borrow.amount} {borrow.symbol}</p>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">${borrow.valueUSD}</p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-sm font-medium text-red-600 dark:text-red-400">{borrow.apy}% APY</p>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">{borrow.chain}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-gray-500 dark:text-gray-400 text-center py-8">No borrowed assets</p>
-                )}
+
+              {/* Deposit YOK Card */}
+              <div className="flex flex-col justify-between bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg p-6 shadow-sm">
+                <div>
+                  <h4 className="text-sm font-semibold text-green-800 dark:text-green-200 mb-1">Deposit YOK Tokens</h4>
+                  <p className="text-sm text-green-700 dark:text-green-300">Deposit your YOK tokens into the platform and start earning.</p>
+                </div>
+                <button
+                  onClick={() => console.log('Deposit YOK clicked')}
+                  className="mt-6 w-full px-4 py-2 text-sm font-semibold rounded bg-green-600 text-white hover:bg-green-700 transition"
+                >
+                  Deposit YOK
+                </button>
               </div>
+
+              {/* Claim Collateral Card */}
+              <div className="flex flex-col justify-between bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700 rounded-lg p-6 shadow-sm">
+                <div>
+                  <h4 className="text-sm font-semibold text-purple-800 dark:text-purple-200 mb-1">Claim Collateral</h4>
+                  <p className="text-sm text-purple-700 dark:text-purple-300">You’re eligible to claim back your collateral. Take action now.</p>
+                </div>
+                <button
+                  onClick={() => console.log('Claim Collateral clicked')}
+                  className="mt-6 w-full px-4 py-2 text-sm font-semibold rounded bg-purple-600 text-white hover:bg-purple-700 transition"
+                >
+                  Claim Collateral
+                </button>
+              </div>
+
             </div>
+
+
           </div>
+
         </>
       )}
     </div>

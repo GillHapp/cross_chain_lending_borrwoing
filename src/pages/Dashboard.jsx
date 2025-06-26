@@ -180,7 +180,7 @@ const Dashboard = () => {
       );
 
       const destinationChainSelector = "14767482510784806043"; // example: Sepolia selector
-      const receiver = "0xD1ae674f6332Ae704125271238e192ffaFb0fbfB"; // change this to the correct receiver
+      const receiver = "0x1A0Cf6cACc5447469a3cb168cF76E91C706DFCcd"; // change this to the correct receiver
       const message = "Loan Request";
       const tokenAddress = "0x4e9097fa54f0a31f4c049ddb4092f0a7503f908e"; // YOK token address
 
