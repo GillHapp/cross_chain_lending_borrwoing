@@ -174,19 +174,58 @@ const LandingPage = () => {
             Secure, decentralized infrastructure using Chainlink’s Cross-Chain Interoperability Protocol, Price Feed.
           </p>
           <div className="grid md:grid-cols-3 gap-8">
+            {/* CCIP Card */}
             <div className="p-8 rounded-2xl border dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50">
               <h3 className="text-xl font-semibold dark:text-white mb-4">CCIP</h3>
-              <p className="text-gray-600 dark:text-gray-300">Reliable cross-chain messaging and token bridging for asset flow.</p>
+              <ul className="space-y-2 text-gray-600 dark:text-gray-300 list-disc pl-5">
+                <li>
+                  <strong>Cross-Chain Messaging:</strong> Enables reliable messaging between Sepolia and Avalanche Fuji via Chainlink CCIP.
+                </li>
+                <li>
+                  <strong>Token Transfers:</strong> Handles secure cross-chain token bridging backed by LINK.
+                </li>
+                <li>
+                  <strong>On-Chain Coordination:</strong> Synchronizes repayment and collateral status across chains.
+                </li>
+              </ul>
             </div>
+
+            {/* Price Feeds Card */}
             <div className="p-8 rounded-2xl border dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50">
               <h3 className="text-xl font-semibold dark:text-white mb-4">Price Feeds</h3>
-              <p className="text-gray-600 dark:text-gray-300">Protects the protocol during liquidations with real-time ETH/USD pricing.</p>
+              <ul className="space-y-2 text-gray-600 dark:text-gray-300 list-disc pl-5">
+                <li>
+                  <strong>Chainlink Oracles:</strong> Uses ETH/USD feeds to calculate loan health in real-time.
+                </li>
+                <li>
+                  <strong>Risk Management:</strong> Prevents liquidations caused by stale or manipulated prices.
+                </li>
+                <li>
+                  <strong>Collateral Checks:</strong> Ensures borrowing limits are dynamically enforced.
+                </li>
+              </ul>
             </div>
-            {/* <div className="p-8 rounded-2xl border dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50">
-              <h3 className="text-xl font-semibold dark:text-white mb-4">Automation</h3>
-              <p className="text-gray-600 dark:text-gray-300">Triggers liquidation, collateral checks, and contract calls automatically.</p>
-            </div> */}
+
+            {/* Tech Stack Card */}
+            <div className="p-8 rounded-2xl border dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50">
+              <h3 className="text-xl font-semibold dark:text-white mb-4">Tech Stack</h3>
+              <ul className="space-y-2 text-gray-600 dark:text-gray-300 list-disc pl-5">
+                <li>
+                  <strong>Frontend:</strong> Built with <span className="font-medium">Vite + React</span> for fast development and lightning-fast HMR.
+                </li>
+                <li>
+                  <strong>Smart Contracts:</strong> Written in <span className="font-medium">Solidity</span> and deployed using <span className="font-medium">Remix IDE</span>.
+                </li>
+                <li>
+                  <strong>Networks:</strong> Deployed on <span className="font-medium">Ethereum Sepolia Testnet</span> and <span className="font-medium">Avalanche Fuji Testnet</span>.
+                </li>
+                <li>
+                  <strong>Wallet Integration:</strong> Using <span className="font-medium">wagmi</span> and <span className="font-medium">ethers.js</span> for seamless Web3 interactions.
+                </li>
+              </ul>
+            </div>
           </div>
+
         </div>
       </section>
 
