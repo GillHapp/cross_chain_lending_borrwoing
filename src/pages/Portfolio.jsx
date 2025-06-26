@@ -135,11 +135,13 @@ const Portfolio = () => {
 
           const provider = new ethers.BrowserProvider(window.ethereum);
           const contract = new ethers.Contract(LENDING_BORROWING_ADDRESS, LENDING_BORROWING_ABI, provider);
-
+          const contractEthBalance = await provider.getBalance(LENDING_BORROWING_ADDRESS);
+          const contractEthBalanceFormatted = ethers.formatEther(contractEthBalance);
+          setEthDeposited(contractEthBalanceFormatted);
           const userBalance = await contract.userCollateral(address);
           const ethDepositedWei = userBalance.ethAmount;
           const ethDepositedFormatted = ethers.formatEther(ethDepositedWei);
-          setEthDeposited(ethDepositedFormatted);
+          // setEthDeposited(ethDepositedFormatted);
 
           const yokDepositedWei = userBalance.loanAmount;
           const yokDepositedFormatted = ethers.formatEther(yokDepositedWei);
