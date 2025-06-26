@@ -43,12 +43,11 @@ const Portfolio = () => {
         REPAY_ABI,
         signer
       );
-
       // Parameters
       const destinationChainSelector = "16015286601757825753"; // e.g. Ethereum Sepolia
-      const token = CROSS_CHAIN_TOKEN_ADDRESS_AVALANCE_FUJI; // YOK token on Avalanche Fuji
-      const receiver = "0xd5a038Ae2fFe0DC6258DA646Bd96E97b7B256B11"; // Receiver address on dest chain
-      const message = ""; // Optional text
+      const token = "0xe1f9ff43f85d777866dc378412c6cd21fd23dcc6"; // YOK token on Avalanche Fuji
+      const receiver = "0x6b3f9B8e960B50492bDC5D545d23456c33bD2421"; // Receiver address on dest chain
+      const message = "repay borrow"; // Optional text
 
       // Call the smart contract function
       const tx = await repayContract.sendMessagePayLINK(
