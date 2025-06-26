@@ -5,7 +5,11 @@ import { getUserPortfolio } from '../utils/mockData';
 import { SUPPORTED_CHAINS } from '../config/wagmi';
 import { ethers } from 'ethers';
 import { LENDING_BORROWING_ADDRESS, LENDING_BORROWING_ABI } from '../constants/lending_borrowing';
+import { CROSS_CHAIN_TOKEN_ADDRESS_AVALANCE_FUJI, COMNINED_ABI } from '../constants/cross_chain_token';
 import { REPAY_ADDRESS, REPAY_ABI } from '../constants/repay';
+import { use } from 'react';
+import { toast } from 'react-hot-toast';
+
 const Portfolio = () => {
   const [portfolio, setPortfolio] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -13,17 +17,76 @@ const Portfolio = () => {
   const [ethDeposited, setEthDeposited] = useState(null); // Step 1: Hook
   const [yokDeposited, setYokDeposited] = useState(null); // Step 1: Hook
   const [health, setHealth] = useState(null); // Step 1: Hook
+  const [claimableAmount, setClaimableAmount] = useState(null); // Step 1: Hook
+  const [isClaiming, setIsClaiming] = useState(false);
+  const [isDepositing, setIsDepositing] = useState(false);
 
 
 
 
   const chainId = useChainId();
 
+  const handleDepositYOK = async () => {
+    if (!isConnected || !address) {
+      toast.error("Connect your wallet first");
+      return;
+    }
+
+    try {
+      setIsDepositing(true);
+
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+
+      const repayContract = new ethers.Contract(REPAY_ADDRESS, REPAY_ABI, signer);
+
+      // Step 1: Get user's receipt
+      const [tokenAddress, amount, claimed] = await repayContract.getUserReceipt(address);
+
+      // if (claimed) {
+      //   toast.error("Tokens already deposited.");
+      //   return;
+      // }
+
+      if (amount <= 0n) {
+        toast.error("No tokens to deposit.");
+        return;
+      }
+
+      // Step 2: Approve the repayment contract to spend tokens
+      const yokToken = new ethers.Contract(tokenAddress, COMNINED_ABI, signer);
+
+      const allowance = await yokToken.allowance(address, REPAY_ADDRESS);
+
+      if (allowance < amount) {
+        const approveTx = await yokToken.approve(REPAY_ADDRESS, amount);
+        await approveTx.wait();
+        toast.success("Approval successful.");
+      } else {
+        console.log("Already approved.");
+      }
+
+      // Step 3: Deposit repayment
+      const depositTx = await repayContract.depositRepaymentToken();
+      await depositTx.wait();
+
+      toast.success("YOK token deposited successfully!");
+    } catch (err) {
+      console.error("Deposit failed:", err);
+      toast.error("Deposit failed. Check logs.");
+    } finally {
+      setIsDepositing(false);
+    }
+  };
+
+
+
+
   useEffect(() => {
     const loadPortfolio = async () => {
       setLoading(true);
       try {
-        if (isConnected && address) {
+        if (isConnected && address && chainId) {
           const portfolioData = await getUserPortfolio(address);
           setPortfolio(portfolioData);
 
@@ -38,7 +101,7 @@ const Portfolio = () => {
           const yokDepositedWei = userBalance.loanAmount;
           const yokDepositedFormatted = ethers.formatEther(yokDepositedWei);
           setYokDeposited(yokDepositedFormatted);
-          // setClaimableAmount(yokDepositedFormatted);
+
           const [
             currentEthPrice,
             currentCollateralUsdValue,
@@ -49,9 +112,6 @@ const Portfolio = () => {
 
           setHealth(healthStatus);
         }
-
-
-
       } catch (error) {
         console.error('Error loading portfolio:', error);
       } finally {
@@ -60,7 +120,7 @@ const Portfolio = () => {
     };
 
     loadPortfolio();
-  }, [address, isConnected]);
+  }, [address, isConnected, chainId]);
 
 
   const currentChain = SUPPORTED_CHAINS[chainId];
@@ -72,25 +132,23 @@ const Portfolio = () => {
     }
 
     try {
+      setIsClaiming(true); // Start loading
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
-
-      const repayContract = new ethers.Contract(
-        REPAY_ADDRESS,
-        REPAY_ABI,
-        signer
-      );
+      const repayContract = new ethers.Contract(REPAY_ADDRESS, REPAY_ABI, signer);
 
       const tx = await repayContract.claimReceivedTokens(address);
-      // const userInfo = await repayContract.getUserReceipts(address);
       await tx.wait();
 
       toast.success("Tokens claimed successfully!");
     } catch (err) {
       console.error("Claim failed:", err);
       toast.error("Claim failed. Check eligibility or try again.");
+    } finally {
+      setIsClaiming(false); // Stop loading
     }
   };
+
 
 
 
@@ -248,24 +306,28 @@ const Portfolio = () => {
                 </div>
                 <button
                   onClick={handleClaim}
-                  className="mt-6 w-full px-4 py-2 text-sm font-semibold rounded bg-yellow-600 text-white hover:bg-yellow-700 transition"
+                  disabled={isClaiming}
+                  className="mt-6 w-full px-4 py-2 text-sm font-semibold rounded bg-yellow-600 text-white hover:bg-yellow-700 transition disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  Claim YOK
+                  {isClaiming ? 'Claiming...' : 'Claim YOK'}
                 </button>
+
               </div>
 
               {/* Deposit YOK Card */}
               <div className="flex flex-col justify-between bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg p-6 shadow-sm">
                 <div>
                   <h4 className="text-sm font-semibold text-green-800 dark:text-green-200 mb-1">Deposit YOK Tokens</h4>
-                  <p className="text-sm text-green-700 dark:text-green-300">Deposit your YOK tokens into the platform and start earning.</p>
+                  <p className="text-sm text-green-700 dark:text-green-300">Deposit your YOK tokens back into the platform.</p>
                 </div>
                 <button
-                  onClick={() => console.log('Deposit YOK clicked')}
-                  className="mt-6 w-full px-4 py-2 text-sm font-semibold rounded bg-green-600 text-white hover:bg-green-700 transition"
+                  onClick={handleDepositYOK}
+                  disabled={isDepositing}
+                  className="mt-6 w-full px-4 py-2 text-sm font-semibold rounded bg-green-600 text-white hover:bg-green-700 transition disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  Deposit YOK
+                  {isDepositing ? 'Depositing...' : 'Deposit YOK'}
                 </button>
+
               </div>
 
               {/* Claim Collateral Card */}

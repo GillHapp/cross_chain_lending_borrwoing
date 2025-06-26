@@ -1,4 +1,4 @@
-export const REPAY_ADDRESS = "0x1A0Cf6cACc5447469a3cb168cF76E91C706DFCcd";
+export const REPAY_ADDRESS = "0x3EFD498c8D41217281Bfa886037E21546e7DB001";
 
 export const REPAY_ABI = [
     {
@@ -107,6 +107,31 @@ export const REPAY_ABI = [
         ],
         "name": "SourceChainNotAllowed",
         "type": "error"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "from",
+                "type": "address"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "token",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "amount",
+                "type": "uint256"
+            }
+        ],
+        "name": "CustomTokenTransferred",
+        "type": "event"
     },
     {
         "anonymous": false,
@@ -551,6 +576,40 @@ export const REPAY_ABI = [
             },
             {
                 "internalType": "address",
+                "name": "_token",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "_receiver",
+                "type": "address"
+            },
+            {
+                "internalType": "string",
+                "name": "_text",
+                "type": "string"
+            }
+        ],
+        "name": "sendMessagePayLINK",
+        "outputs": [
+            {
+                "internalType": "bytes32",
+                "name": "messageId",
+                "type": "bytes32"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint64",
+                "name": "_destinationChainSelector",
+                "type": "uint64"
+            },
+            {
+                "internalType": "address",
                 "name": "_receiver",
                 "type": "address"
             },
@@ -570,7 +629,7 @@ export const REPAY_ABI = [
                 "type": "uint256"
             }
         ],
-        "name": "sendMessagePayLINK",
+        "name": "sendMessagePayNative",
         "outputs": [
             {
                 "internalType": "bytes32",
@@ -598,6 +657,24 @@ export const REPAY_ABI = [
             }
         ],
         "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "token",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "amount",
+                "type": "uint256"
+            }
+        ],
+        "name": "transferCustomTokenToContract",
+        "outputs": [],
+        "stateMutability": "nonpayable",
         "type": "function"
     },
     {
