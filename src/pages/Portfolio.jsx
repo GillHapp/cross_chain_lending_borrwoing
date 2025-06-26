@@ -17,14 +17,58 @@ const Portfolio = () => {
   const [ethDeposited, setEthDeposited] = useState(null); // Step 1: Hook
   const [yokDeposited, setYokDeposited] = useState(null); // Step 1: Hook
   const [health, setHealth] = useState(null); // Step 1: Hook
-  const [claimableAmount, setClaimableAmount] = useState(null); // Step 1: Hook
   const [isClaiming, setIsClaiming] = useState(false);
   const [isDepositing, setIsDepositing] = useState(false);
+  const [repay, setRepay] = useState(false); // Step 1: Hook
 
 
 
 
   const chainId = useChainId();
+
+  const handleClaimCollateral = async () => {
+    if (!isConnected || !address) {
+      toast.error("Connect your wallet first");
+      return;
+    }
+
+    try {
+      setRepay(true);
+
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+
+      const repayContract = new ethers.Contract(
+        REPAY_ADDRESS,
+        REPAY_ABI,
+        signer
+      );
+
+      // Parameters
+      const destinationChainSelector = "16015286601757825753"; // e.g. Ethereum Sepolia
+      const token = CROSS_CHAIN_TOKEN_ADDRESS_AVALANCE_FUJI; // YOK token on Avalanche Fuji
+      const receiver = "0xd5a038Ae2fFe0DC6258DA646Bd96E97b7B256B11"; // Receiver address on dest chain
+      const message = ""; // Optional text
+
+      // Call the smart contract function
+      const tx = await repayContract.sendMessagePayLINK(
+        destinationChainSelector,
+        token,
+        receiver,
+        message
+      );
+
+      await tx.wait();
+      toast.success("Collateral claim sent successfully via CCIP!");
+    } catch (err) {
+      console.error("Claim collateral failed:", err);
+      toast.error("Collateral claim failed. Check logs.");
+    } finally {
+      setRepay(false);
+    }
+  };
+
+
 
   const handleDepositYOK = async () => {
     if (!isConnected || !address) {
@@ -337,11 +381,14 @@ const Portfolio = () => {
                   <p className="text-sm text-purple-700 dark:text-purple-300">You’re eligible to claim back your collateral. Take action now.</p>
                 </div>
                 <button
-                  onClick={() => console.log('Claim Collateral clicked')}
-                  className="mt-6 w-full px-4 py-2 text-sm font-semibold rounded bg-purple-600 text-white hover:bg-purple-700 transition"
+                  onClick={handleClaimCollateral}
+                  disabled={isClaiming}
+                  className={`mt-6 w-full px-4 py-2 text-sm font-semibold rounded ${isClaiming ? "bg-purple-400 cursor-not-allowed" : "bg-purple-600 hover:bg-purple-700"
+                    } text-white transition`}
                 >
-                  Claim Collateral
+                  {repay ? "Claiming..." : "Claim Collateral"}
                 </button>
+
               </div>
 
             </div>
