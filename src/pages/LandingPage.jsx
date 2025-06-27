@@ -127,11 +127,11 @@ const LandingPage = () => {
               {[
                 ['Connect Wallet', 'User connects to Sepolia testnet and approves access.'],
                 ['Lend ETH', 'Deposit ETH and receive a receipt token used for redeeming later.'],
-                ['Mint Custom Token', 'Use ETH as collateral and mint YOR (USD-pegged) token on Avalanche.'],
+                ['Mint Custom Token', 'Use ETH as collateral and mint YOK (USD-pegged) token on Avalanche.'],
                 ['Check Borrow Limit', 'Enter address to view available minting amount.'],
-                ['Transfer Token', 'Bridge YOR token to user Avalanche address.'],
+                ['Transfer Token', 'Bridge YOK token to user Avalanche address.'],
                 ['Health Check & Liquidate', 'Monitor user health factor and liquidate if needed.'],
-                ['Repay Loan', 'Deposit YOR token on Avalanche and trigger unlock on Sepolia.'],
+                ['Repay Loan', 'Deposit YOK token on Avalanche and trigger unlock on Sepolia.'],
                 ['Redeem ETH', 'Withdraw ETH by burning your receipt token.']
               ].map(([title, text], i) => (
                 <div key={i} className="flex items-start space-x-4">

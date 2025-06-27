@@ -354,7 +354,7 @@ const Portfolio = () => {
               {/* Claim Rewards Card */}
               <div className="flex flex-col justify-between bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-300 dark:border-yellow-700 rounded-lg p-6 shadow-sm">
                 <div>
-                  <h4 className="text-sm font-semibold text-yellow-800 dark:text-yellow-200 mb-1">Claim YOK Rewards</h4>
+                  <h4 className="text-sm font-semibold text-yellow-800 dark:text-yellow-200 mb-1">Claim YOK </h4>
                   <p className="text-sm text-yellow-700 dark:text-yellow-300">Rewards are available. Don’t miss your chance to claim your YOK tokens.</p>
                 </div>
                 <button
@@ -401,7 +401,17 @@ const Portfolio = () => {
               </div>
 
             </div>
-
+            <div className="mt-6 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-100 rounded p-4">
+              <p className="text-sm">
+                <strong>Note:</strong> If you don't see your <strong>YOK</strong> token after depositing your collateral, please import it manually to MetaMask using this contract address:
+              </p>
+              <div className="mt-2 text-sm font-mono bg-white dark:bg-gray-700 px-3 py-2 rounded border border-gray-200 dark:border-gray-600">
+                0xe1f9ff43f85d777866dc378412c6cd21fd23dcc6
+              </div>
+              <p className="mt-2 text-sm">
+                You can do this in MetaMask by clicking “Import Tokens” and pasting the address above.
+              </p>
+            </div>
 
           </div>
 
