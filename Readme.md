@@ -124,6 +124,28 @@ npm run dev
 
 ------------------------
 
+## 🔗 Chainlink Services Used
+
+This project integrates multiple Chainlink services to ensure secure, reliable, and decentralized infrastructure for DeFi operations:
+
+### 1. [Chainlink Data Feeds](https://docs.chain.link/data-feeds)
+
+* **Purpose**: Fetches real-time, tamper-proof price data.
+* **Use Case**: Used to securely access the **ETH/USD** price feed, ensuring accurate asset valuation within lending and borrowing protocols.
+
+### 2. [Chainlink CCIP (Cross-Chain Interoperability Protocol)](https://docs.chain.link/ccip)
+
+* **Purpose**: Enables secure cross-chain communication and token transfers.
+* **Use Case**: Powers seamless cross-chain lending and borrowing by connecting different blockchain networks in a trust-minimized way.
+
+### 3. [Chainlink Cross-Chain Token Manager](https://test.tokenmanager.chain.link/)
+
+* **Purpose**: Manages cross-chain ERC-20 tokens.
+* **Use Case**: Deploys and manages a custom cross-chain token (e.g., YOK) pegged to **1 USD**, ensuring price stability and interoperability across chains — a foundational requirement for scalable cross-chain DeFi.
+
+
+-----------
+
 ### 🌍 User Experience
 👤 Lender View
 Deposit ETH → receive aTokens.
