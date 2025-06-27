@@ -56,9 +56,17 @@ const Portfolio = () => {
         receiver,
         message
       );
-
+      console.log("Transaction sent:", tx.hash);
       await tx.wait();
       toast.success("Collateral claim sent successfully via CCIP!");
+      toast.success(
+        // https://ccip.chain.link/#/side-drawer/msg/0x554cf82938d0f44df1e51c35f69f4596a794d6405ccea8cddc4655fd9ab36540
+        <div>
+          ✅ Repay Token and message dispatched! <br />
+          🔗 <a href={`https://ccip.chain.link/#/side-drawer/msg/${tx.hash}`} target="_blank" rel="noopener noreferrer">View on CCIP Explorer</a> <br />
+          📄 <a href={`https://sepolia.etherscan.io/tx/${tx.hash}`} target="_blank" rel="noopener noreferrer">View on Etherscan</a>
+        </div>
+      );
     } catch (err) {
       console.error("Claim collateral failed:", err);
       toast.error("Collateral claim failed. Check logs.");

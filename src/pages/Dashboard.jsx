@@ -194,8 +194,16 @@ const Dashboard = () => {
         }
       );
 
+      console.log("Transaction sent:", tx.hash);
       await tx.wait();
-
+      toast.success(
+        // https://ccip.chain.link/#/side-drawer/msg/0x554cf82938d0f44df1e51c35f69f4596a794d6405ccea8cddc4655fd9ab36540
+        <div>
+          ✅ Collateral sent and message dispatched! <br />
+          🔗 <a href={`https://ccip.chain.link/#/side-drawer/msg/${tx.hash}`} target="_blank" rel="noopener noreferrer">View on CCIP Explorer</a> <br />
+          📄 <a href={`https://sepolia.etherscan.io/tx/${tx.hash}`} target="_blank" rel="noopener noreferrer">View on Etherscan</a>
+        </div>
+      );
       toast.success("Collateral deposited and YOK message sent!");
       setCollateralAmount('');
       setIsCollateralModalOpen(false);
