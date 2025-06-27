@@ -206,21 +206,18 @@ const LandingPage = () => {
               </ul>
             </div>
 
-            {/* Tech Stack Card */}
+            {/* Cross-Chain Token Manager Card */}
             <div className="p-8 rounded-2xl border dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50">
-              <h3 className="text-xl font-semibold dark:text-white mb-4">Tech Stack</h3>
+              <h3 className="text-xl font-semibold dark:text-white mb-4">Cross-Chain Token Manager</h3>
               <ul className="space-y-2 text-gray-600 dark:text-gray-300 list-disc pl-5">
                 <li>
-                  <strong>Frontend:</strong> Built with <span className="font-medium">Vite + React</span> for fast development and lightning-fast HMR.
+                  <strong>Chainlink CCTM:</strong> Simplifies cross-chain token deployment and lifecycle management.
                 </li>
                 <li>
-                  <strong>Smart Contracts:</strong> Written in <span className="font-medium">Solidity</span> and deployed using <span className="font-medium">Remix IDE</span>.
+                  <strong>Multi-Network Support:</strong> Tokens deployed on Sepolia and Avalanche Fuji with CCIP routing.
                 </li>
                 <li>
-                  <strong>Networks:</strong> Deployed on <span className="font-medium">Ethereum Sepolia Testnet</span> and <span className="font-medium">Avalanche Fuji Testnet</span>.
-                </li>
-                <li>
-                  <strong>Wallet Integration:</strong> Using <span className="font-medium">wagmi</span> and <span className="font-medium">ethers.js</span> for seamless Web3 interactions.
+                  <strong>Integrated Frontend:</strong> Built with React + wagmi for seamless minting and transfers.
                 </li>
               </ul>
             </div>
