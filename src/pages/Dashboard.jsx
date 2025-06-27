@@ -446,17 +446,18 @@ const Dashboard = () => {
         </div>
       </div>
       {/* Token Import Notice */}
-      <div className="mt-6 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-300 dark:border-yellow-700 text-yellow-800 dark:text-yellow-200 rounded p-4">
+      <div className="mt-6 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-100 rounded p-4">
         <p className="text-sm">
           <strong>Note:</strong> If you don't see your <strong>aTOK</strong> token after supplying, please import it manually to MetaMask using this contract address:
         </p>
-        <div className="mt-2 text-sm font-mono bg-white dark:bg-gray-800 px-3 py-2 rounded border border-gray-300 dark:border-gray-600">
+        <div className="mt-2 text-sm font-mono bg-white dark:bg-gray-700 px-3 py-2 rounded border border-gray-200 dark:border-gray-600">
           0xce8C76D90679d5b34DB1e9F50771cB39F79B36FC
         </div>
         <p className="mt-2 text-sm">
           You can do this in MetaMask by clicking “Import Tokens” and pasting the address above.
         </p>
       </div>
+
 
       {/* Borrowing Table */}
       <div className="flex items-center space-x-3 mt-12 mb-4">
