@@ -116,11 +116,12 @@ npm run dev
 
 ```
 
-| Contract               | Network        | Responsibility                                |
-| ---------------------- | -------------- | --------------------------------------------- |
-| `LendingBorrowing.sol` | Sepolia        | Manages ETH lending, borrowing, and aTokens   |
-| `Repayment.sol`        | Avalanche Fuji | Manages repayment and triggers CCIP messaging |
-| `CrossChainToken.sol`  | Both           | Mints and tracks YOK token + CCIP approvals   |
+| Contract               | Network        | Responsibility                                                            | Address                                      |
+| ---------------------- | -------------- | ------------------------------------------------------------------------- | -------------------------------------------- |
+| `LendingBorrowing.sol` | Sepolia        | Manages ETH lending, borrowing logic, and issues `aToken` to lenders      | `0x6b3f9B8e960B50492bDC5D545d23456c33bD2421` |
+| `aToken`               | Sepolia        | ERC-20 token representing interest-bearing deposits from lenders          | `0xce8C76D90679d5b34DB1e9F50771cB39F79B36FC` |
+| `Repayment.sol`        | Avalanche Fuji | Handles repayments and triggers cross-chain messaging via Chainlink CCIP  | `0x4db8Db69Ff99F7742D92340b29bd5B6A8018f35E` |
+| `CrossChainToken.sol`  | Both           | Mints and manages `YOK` token, facilitates cross-chain approvals via CCIP |  CCIP cross chain token transfer             |
 
 ------------------------
 
